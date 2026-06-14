@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ads Growly - OpenAI Growth Engine</title>
+    <meta name="description" content="Weaponize OpenAI models to automate ad creative generation, semantic search harvesting, and real-time bid optimization.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    borderRadius: {
+                        'xs': '2px',
+                        'sm': '4px',
+                        'md': '8px',
+                        'lg': '12px',
+                        'xl': '16px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                    },
+                    colors: {
+                        glassred: '#E53935',
+                        glassblue: '#1E88E5',
+                        navy: '#0A1128',
+                        obsidian: '#101820',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Tabler Icons CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body class="bg-[#F4F7F6] text-[#111111] font-sans selection:bg-[#E53935] selection:text-white">
+
+<div class="bg-[#F4F7F6] text-[#111111] font-sans selection:bg-[#E53935] selection:text-white" data-kid="0">
+    <style data-kid="1">
+        @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont/tabler-icons.min.css');
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-syne { font-family: 'Syne', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .glass-dark {
+            background: rgba(17, 17, 17, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .shadow-soft {
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+        }
+
+        .shadow-glass {
+            box-shadow: 0 20px 50px -15px rgba(31, 38, 135, 0.08);
+        }
+
+        @keyframes floaty2 {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-floaty2 { animation: floaty2 5s ease-in-out infinite; }
+    </style>
+
+    <!-- NAVIGATION -->
+    <nav class="relative w-full z-50 px-10 py-8 flex justify-between items-center bg-white/30 backdrop-blur-xs">
+        <div class="flex items-center gap-3">
+            <svg width="44" height="44" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-[0_8px_16px_rgba(229,57,53,0.35)]">
+                <rect width="48" height="48" rx="13" fill="#E53935"></rect>
+                <rect width="48" height="48" rx="13" fill="url(#lg1)" fill-opacity="0.25"></rect>
+                <defs>
+                    <linearGradient id="lg1" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="white"></stop>
+                        <stop offset="1" stop-color="white" stop-opacity="0"></stop>
+                    </linearGradient>
+                </defs>
+                <rect x="9" y="29" width="5.5" height="10" rx="2" fill="white" fill-opacity="0.45"></rect>
+                <rect x="18" y="24" width="5.5" height="15" rx="2" fill="white" fill-opacity="0.65"></rect>
+                <rect x="27" y="19" width="5.5" height="20" rx="2" fill="white" fill-opacity="0.85"></rect>
+                <path d="M10 26 L22 17.5 L27 21 L36 12.5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+                <path d="M37.2 6.2 L38.1 8.2 L39.6 7.5 L39.3 9.2 L41.2 9.5 L39.9 10.9 L41.5 11.9 L39.7 12.5 L40.2 14.2 L38.4 13.7 L38.1 15.7 L37.2 14.4 L36.3 15.7 L36 13.7 L34.2 14.2 L34.7 12.5 L32.9 11.9 L34.5 10.9 L33.2 9.5 L35.1 9.2 L34.8 7.5 L36.3 8.2 Z" fill="white"></path>
+            </svg>
+            <span class="text-2xl font-extrabold tracking-tighter text-[#111111]">Ads growly<span class="text-[#E53935]">.</span></span>
+            <span class="text-[9px] font-mono font-black bg-[#E53935]/10 text-[#E53935] px-2 py-0.5 rounded-full ml-1 uppercase tracking-widest">OpenAI Stack</span>
+        </div>
+        <div class="hidden md:flex items-center gap-10 font-semibold text-sm">
+            <a href="glassmorphic_polish.html#toolkit" class="text-slate-600 hover:text-[#111111] transition-colors">Our Systems</a>
+            <a href="glassmorphic_polish.html#gmb-engine" class="text-slate-600 hover:text-[#111111] transition-colors">GMB Local Engine</a>
+            <a href="#simulator" class="text-slate-600 hover:text-[#111111] transition-colors">AI Writer Demo</a>
+            <a href="glassmorphic_polish.html#pricing" class="text-slate-600 hover:text-[#111111] transition-colors">Pricing</a>
+        </div>
+        <a href="glassmorphic_polish.html#audit-form" class="glass px-8 py-3.5 rounded-2xl text-sm font-bold shadow-soft hover:bg-white transition-all border-slate-200/50">
+            Audit Your Brand
+        </a>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="relative pt-24 pb-24 px-6 flex flex-col items-center overflow-hidden">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center w-full relative z-10">
+            <div>
+                <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white border border-slate-100 shadow-soft mb-8">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                    </span>
+                    <span class="text-[10px] font-black uppercase tracking-[0.15em] text-slate-500">AI Model: GPT-4o & Custom RAG</span>
+                </div>
+                
+                <h1 class="text-5xl md:text-7xl font-syne font-extrabold leading-[0.95] tracking-tight uppercase mb-8 text-[#111111]">
+                    WEAPONIZE <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-[#E53935] italic">OPENAI</span> FOR <br>
+                    LOCAL ADS
+                </h1>
+                
+                <p class="text-xl text-slate-500 max-w-xl mb-12 leading-relaxed font-medium">
+                    We deploy custom-trained AI agents that build semantic keyword lists, write scroll-stopping copy variants, and manage bid adjustments every 180 seconds. Absolute ROI, zero waste.
+                </p>
+                <div class="flex flex-wrap gap-5">
+                    <a href="#simulator" class="bg-[#111111] text-white px-8 py-4.5 rounded-2xl font-bold shadow-xl hover:scale-105 transition-transform text-sm uppercase tracking-wider flex items-center gap-3">
+                        Launch AI Writer Demo <i class="ti ti-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Interactive AI Simulator Box -->
+            <div id="simulator" class="w-full max-w-xl justify-self-center lg:justify-self-end glass rounded-3xl p-8 border-white/60 shadow-glass relative">
+                <div class="absolute -top-12 -right-8 w-24 h-24 bg-red-100/30 blur-2xl rounded-full"></div>
+                <div class="flex items-center justify-between pb-6 border-b border-slate-100 mb-6">
+                    <div class="flex items-center gap-3">
+                        <i class="ti ti-sparkles text-[#E53935] text-2xl animate-pulse"></i>
+                        <div>
+                            <span class="text-[9px] font-mono text-slate-400 block uppercase tracking-widest">OpenAI Agent</span>
+                            <span class="text-sm font-bold text-slate-700">Ad Creative Prototyper</span>
+                        </div>
+                    </div>
+                    <span class="text-[9px] font-mono bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-bold">CONNECTED</span>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-3 font-black">Target Service Sector</label>
+                        <div class="relative">
+                            <select id="sim-vertical" class="w-full appearance-none bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all cursor-pointer">
+                                <option value="roofing">Residential Roofing Replacement</option>
+                                <option value="hvac">HVAC Maintenance & Install</option>
+                                <option value="dental">Cosmetic Dentistry / Invisalign</option>
+                                <option value="legal">Personal Injury Legal Advocacy</option>
+                            </select>
+                            <div class="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                <i class="ti ti-chevron-down text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="sim-generate" class="w-full py-4.5 bg-[#111111] hover:bg-slate-900 text-white text-xs font-black rounded-2xl uppercase tracking-widest flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
+                        Generate High-Yield Copy <i class="ti ti-rotate"></i>
+                    </button>
+
+                    <!-- Console output window -->
+                    <div class="glass-dark border border-white/5 rounded-2xl p-6 font-mono text-xs text-slate-300 min-h-[220px] space-y-4 relative overflow-hidden shadow-inner">
+                        <div id="console-status" class="text-slate-500">// Output will render here...</div>
+                        
+                        <div id="ad-headline-wrap" class="hidden">
+                            <span class="text-[#E53935] block mb-1 font-bold">Headline (30 chars limit):</span>
+                            <div id="ad-headline" class="text-white font-bold text-sm bg-white/5 p-3 rounded-lg border border-white/5"></div>
+                        </div>
+                        
+                        <div id="ad-desc-wrap" class="hidden">
+                            <span class="text-blue-400 block mb-1 font-bold">Description (90 chars limit):</span>
+                            <div id="ad-desc" class="text-slate-200 bg-white/5 p-3 rounded-lg border border-white/5 leading-relaxed"></div>
+                        </div>
+
+                        <div id="ad-primary-wrap" class="hidden">
+                            <span class="text-green-400 block mb-1 font-bold">Primary Text / Angles:</span>
+                            <div id="ad-primary" class="text-slate-200 bg-white/5 p-3 rounded-lg border border-white/5 leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CORE CAPABILITIES -->
+    <section id="features" class="py-32 px-6 border-t border-slate-100 bg-white relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="max-w-2xl mb-24">
+                <span class="text-blue-600 font-mono text-xs uppercase tracking-[0.3em] block mb-4 font-black">Core Model Stack</span>
+                <h2 class="text-4xl md:text-5xl font-syne font-extrabold leading-tight tracking-tight text-[#111111]">COGNITIVE ACQUISITION</h2>
+                <p class="text-slate-500 text-base md:text-lg leading-relaxed mt-4 font-medium">We wrap OpenAI models in proprietary scrapers and data flows to deliver autonomous marketing dominance.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="glass p-10 rounded-[2.5rem] border-white/60 relative overflow-hidden group hover:border-blue-500/30 transition-all duration-500 hover:-translate-y-1 shadow-soft">
+                    <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-600 mb-8">
+                        <i class="ti ti-brain text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-[#111111]">Semantic Scrapers</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6">Autonomous mapping of local, high-intent long-tail keywords in your area. Stops money leakages on unrelated clicks.</p>
+                    <span class="font-mono text-[9px] text-blue-600 tracking-widest uppercase font-bold">GPT-4o Embedding APIs</span>
+                </div>
+                <!-- Card 2 -->
+                <div class="glass p-10 rounded-[2.5rem] border-white/60 relative overflow-hidden group hover:border-red-500/30 transition-all duration-500 hover:-translate-y-1 shadow-soft">
+                    <div class="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center text-[#E53935] mb-8">
+                        <i class="ti ti-forms text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-[#111111]">UGC Variations</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6">Instant copywriting variants tailored to exact local zip codes. Captures attention with hyper-localized relevance.</p>
+                    <span class="font-mono text-[9px] text-[#E53935] tracking-widest uppercase font-bold">Creative Prompting v2</span>
+                </div>
+                <!-- Card 3 -->
+                <div class="glass p-10 rounded-[2.5rem] border-white/60 relative overflow-hidden group hover:border-green-500/30 transition-all duration-500 hover:-translate-y-1 shadow-soft">
+                    <div class="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-600 mb-8">
+                        <i class="ti ti-adjustments-bolt text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-[#111111]">180s Bid Optimization</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6">Our ad automation monitors live CPL indicators and re-calibrates bids against competitor auction signals dynamically.</p>
+                    <span class="font-mono text-[9px] text-green-600 tracking-widest uppercase font-bold">Autonomous Agent Nodes</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROMOTIONAL BENTO CARD -->
+    <section id="offer" class="py-32 px-6 relative bg-white border-t border-slate-100">
+        <div class="max-w-5xl mx-auto">
+            <div class="glass-dark text-white p-12 md:p-16 rounded-[3rem] border border-white/10 bg-gradient-to-br from-[#111111] via-[#0A0B10] to-[#111111] relative overflow-hidden flex flex-col md:flex-row items-center gap-12 shadow-2xl">
+                <!-- Radial Glow Background -->
+                <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+                <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-red-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+                <div class="md:w-3/5 relative z-10 space-y-6">
+                    <div class="inline-block px-3 py-1 bg-red-500 text-white font-mono text-[9px] font-bold rounded-full uppercase tracking-wider">Premium Growth Deal</div>
+                    <h2 class="text-4xl md:text-5xl font-syne font-extrabold uppercase leading-tight">GET A FREE CUSTOM WEBSITE</h2>
+                    <p class="text-slate-300 text-base md:text-lg leading-relaxed">
+                        Join our Premium acquisition plan and we'll build, optimize, and launch a bespoke, high-performance website for your service brand — at zero cost. Hostings, SEO, and integrations included.
+                    </p>
+                    <div class="flex items-center gap-4 text-xs font-mono text-blue-400">
+                        <i class="ti ti-circle-check-filled text-lg text-green-400"></i>
+                        <span>Includes full CRM & ad lead tracking integration</span>
+                    </div>
+                </div>
+                <div class="md:w-2/5 flex flex-col items-center justify-center relative z-10 w-full">
+                    <div class="glass p-8 rounded-2xl w-full border-white/10 text-center max-w-sm bg-white/5 backdrop-blur-md">
+                        <div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest mb-3">Value Deployed</div>
+                        <div class="text-5xl font-extrabold mb-2 font-mono text-white">$4,800<span class="text-lg text-slate-500 font-normal"> CAD</span></div>
+                        <div class="text-xs text-green-400 font-bold mb-6">COMPLETELY WAIVED</div>
+                        <a href="glassmorphic_polish.html#audit-form" class="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-xs font-black uppercase tracking-widest block text-center rounded-xl shadow-lg">Claim Website Offer</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-100 py-20 px-6 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12 relative z-10">
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-3">
+                    <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="48" height="48" rx="13" fill="#E53935"></rect>
+                        <path d="M10 26 L22 17.5 L27 21 L36 12.5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+                    </svg>
+                    <span class="font-extrabold text-xl tracking-tighter text-[#111111]">Ads growly<span class="text-[#E53935]">.</span></span>
+                </div>
+                <p class="font-mono text-[9px] text-slate-400 uppercase tracking-widest leading-relaxed">
+                    OpenAI Integration Stack v1.0.4<br>
+                    Autonomous local expansion vectors.
+                </p>
+            </div>
+            
+            <div class="flex flex-wrap gap-16 font-mono text-xs text-slate-500 font-semibold">
+                <div class="flex flex-col gap-4">
+                    <span class="text-blue-600 uppercase tracking-widest text-[9px] font-bold">AI Models</span>
+                    <a href="#" class="hover:text-slate-900 transition-colors">GPT-4o Agency</a>
+                    <a href="#" class="hover:text-slate-900 transition-colors">Semantic Embeddings</a>
+                    <a href="#" class="hover:text-slate-900 transition-colors">Fine-tuned RAG</a>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <span class="text-[#E53935] uppercase tracking-widest text-[9px] font-bold">Integration</span>
+                    <a href="#" class="hover:text-slate-900 transition-colors">Meta Ads Engine</a>
+                    <a href="#" class="hover:text-slate-900 transition-colors">Google Ads Core</a>
+                    <a href="#" class="hover:text-slate-900 transition-colors">CRM Webhooks</a>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <span class="text-slate-400 uppercase tracking-widest text-[9px] font-bold">Connection</span>
+                    <div class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        <span class="text-[9px] text-green-600 tracking-widest uppercase">OpenAI Link Established</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto mt-16 pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-mono text-slate-400">
+            <span>© 2026 Ads Growly. OpenAI Cognitive Pipeline.</span>
+            <span>Local Latency Check: 24ms</span>
+        </div>
+    </footer>
+</div>
+
+    <!-- INTERACTIVE WRITER SCRIPT -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const verticalSelect = document.getElementById('sim-vertical');
+            const generateBtn = document.getElementById('sim-generate');
+            
+            const consoleStatus = document.getElementById('console-status');
+            const headlineWrap = document.getElementById('ad-headline-wrap');
+            const headlineText = document.getElementById('ad-headline');
+            const descWrap = document.getElementById('ad-desc-wrap');
+            const descText = document.getElementById('ad-desc');
+            const primaryWrap = document.getElementById('ad-primary-wrap');
+            const primaryText = document.getElementById('ad-primary');
+
+            const adTemplates = {
+                roofing: {
+                    headline: "Need a New Roof in Ontario?",
+                    desc: "Free estimates, 0% financing options, and 50-year warranty roofs installed in 48 hours.",
+                    primary: "🚨 Ontario Homeowners: Don't wait for the next storm. Claim your FREE roof diagnostic inspection today. Click to get a guaranteed quote in 60 seconds."
+                },
+                hvac: {
+                    headline: "AC Down? Fast Ontario Repair",
+                    desc: "Same-day HVAC repairs, licensed techs, and 100% satisfaction guarantee. Book online.",
+                    primary: "❄️ Beat the summer humidity. If your cooling system is struggling, our certified engineers are in your area now. No extra diagnostic fees when we complete the repair!"
+                },
+                dental: {
+                    headline: "Get Your Dream Smile - Invisalign",
+                    desc: "CAD $500 off dental implants & invisible aligners. Free digital scan & consultation.",
+                    primary: "🦷 Regain your confidence. Our local dental specialists provide clear pricing and payment plans starting at $49/week. See your projected smile transformation today!"
+                },
+                legal: {
+                    headline: "Injured in Ontario? Get Help",
+                    desc: "You don't pay unless we win. Over $80M recovered. Speak with an injury lawyer now.",
+                    primary: "⚖️ Focus on your recovery, we handle the insurance grids. Free, zero-obligation case evaluation at home or hospital. Secure the compensation you deserve."
+                }
+            };
+
+            generateBtn.addEventListener('click', () => {
+                const vertical = verticalSelect.value;
+                const adData = adTemplates[vertical];
+
+                // Hide output blocks
+                headlineWrap.classList.add('hidden');
+                descWrap.classList.add('hidden');
+                primaryWrap.classList.add('hidden');
+
+                // Animate console simulation
+                consoleStatus.innerHTML = `// Initializing OpenAI GPT-4o creative request...`;
+                
+                setTimeout(() => {
+                    consoleStatus.innerHTML = `// Generating ad variants for local service radius...`;
+                    
+                    setTimeout(() => {
+                        consoleStatus.innerHTML = `// Copy generation successfully completed in 340ms:`;
+                        
+                        // Populate and show fields
+                        headlineText.textContent = adData.headline;
+                        descText.textContent = adData.desc;
+                        primaryText.textContent = adData.primary;
+
+                        headlineWrap.classList.remove('hidden');
+                        descWrap.classList.remove('hidden');
+                        primaryWrap.classList.remove('hidden');
+                    }, 500);
+                }, 400);
+            });
+        });
+    </script>
+</body>
+</html>
