@@ -1,265 +1,478 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock3,
+  Eye,
+  Lock,
+  LogOut,
+  Mail,
+  Phone,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+  Trash2,
+  Users,
+} from "lucide-react";
 import Logo from "@/components/Logo";
 
-export default function AdminDashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+const statusOptions = ["pending", "contacted", "qualified", "closed"];
+
+const statusLabels = {
+  pending: "Pending",
+  contacted: "Contacted",
+  qualified: "Qualified",
+  closed: "Closed",
+};
+
+function formatDate(value) {
+  if (!value) return "Not recorded";
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+function StatCard({ label, value, icon: Icon }) {
+  return (
+    <article className="admin-stat">
+      <Icon size={26} />
+      <div>
+        <span>{label}</span>
+        <strong>{value}</strong>
+      </div>
+    </article>
+  );
+}
+
+function LoginPanel({ mode, onLogin }) {
   const [passcode, setPasscode] = useState("");
-  const [submissions, setSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ total: 0, pending: 0, contacted: 0, qualified: 0 });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const correctPasscode = "admin123";
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (passcode === correctPasscode) {
-      setIsAuthenticated(true);
-      fetchSubmissions();
-    } else {
-      alert("Invalid Passcode key.");
-    }
-  };
-
-  const fetchSubmissions = async () => {
+  const submitLogin = async (event) => {
+    event.preventDefault();
     setLoading(true);
+    setError("");
+
     try {
-      const { data, error } = await supabase
-        .from("submissions")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passcode }),
+      });
+      const result = await response.json();
 
-      if (error) throw error;
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to unlock admin panel.");
+      }
 
-      setSubmissions(data || []);
-      calculateStats(data || []);
-    } catch (err) {
-      console.error("Error fetching submissions:", err);
+      setPasscode("");
+      onLogin();
+    } catch (loginError) {
+      setError(loginError.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateStats = (data) => {
-    const total = data.length;
-    const pending = data.filter((s) => s.status === "pending" || !s.status).length;
-    const contacted = data.filter((s) => s.status === "contacted").length;
-    const qualified = data.filter((s) => s.status === "qualified").length;
+  return (
+    <main className="admin-login-shell">
+      <Link href="/" className="brand-link admin-login-brand">
+        <Logo size={40} />
+        <span>Ads Growly</span>
+      </Link>
 
-    setStats({ total, pending, contacted, qualified });
-  };
+      <section className="admin-login-panel">
+        <span className="login-lock">
+          <Lock size={32} />
+        </span>
+        <h1>Admin panel</h1>
+        <p>Enter passcode to continue</p>
 
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      const { error } = await supabase
-        .from("submissions")
-        .update({ status: newStatus })
-        .eq("id", id);
+        <form onSubmit={submitLogin}>
+          <label>
+            Passcode
+            <input
+              type="password"
+              value={passcode}
+              onChange={(event) => setPasscode(event.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </label>
+          {error && <p className="form-error">{error}</p>}
+          <button className="button button-primary submit-button" type="submit" disabled={loading}>
+            {loading ? "Unlocking..." : "Unlock"}
+          </button>
+        </form>
+      </section>
 
-      if (error) throw error;
+      {mode === "local-preview" && (
+        <p className="admin-dev-note">
+          Local preview passcode: <strong>local-preview</strong>. Set <code>ADMIN_PASSCODE</code>{" "}
+          before deploying.
+        </p>
+      )}
+    </main>
+  );
+}
 
-      const updated = submissions.map((s) =>
-        s.id === id ? { ...s, status: newStatus } : s
-      );
-      setSubmissions(updated);
-      calculateStats(updated);
-    } catch (err) {
-      alert("Failed to update status: " + err.message);
-    }
-  };
+function EmptyState() {
+  return (
+    <div className="admin-empty-state">
+      <span>
+        <Mail size={36} />
+      </span>
+      <h2>No submissions yet</h2>
+      <p>New form submissions will appear here.</p>
+    </div>
+  );
+}
 
-  const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this lead record?")) return;
-
-    try {
-      const { error } = await supabase
-        .from("submissions")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-
-      const updated = submissions.filter((s) => s.id !== id);
-      setSubmissions(updated);
-      calculateStats(updated);
-    } catch (err) {
-      alert("Failed to delete record: " + err.message);
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#F4F7F6] flex flex-col justify-center items-center px-6 font-sans">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-100/20 rounded-full blur-[120px] pointer-events-none -z-10" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-100/20 rounded-full blur-[120px] pointer-events-none -z-10" />
-
-        <div className="mb-8 flex items-center gap-3">
-          <Logo size={40} />
-          <span className="font-syne text-2xl font-extrabold tracking-tight">Ads<span className="text-[#E53935]">Growly</span></span>
+function LeadMobileCard({ lead, onStatusChange, onDelete }) {
+  return (
+    <article className="lead-mobile-card">
+      <div className="lead-card-top">
+        <div>
+          <h3>{lead.business_name}</h3>
+          <p>{lead.contact_name}</p>
         </div>
-
-        <div className="glass p-8 rounded-3xl w-full max-w-sm border-white/80 shadow-glass bg-white/40 backdrop-blur-md">
-          <h2 className="text-xl font-syne font-bold mb-2 text-center text-slate-800">ADMIN CONTROL HUB</h2>
-          <p className="text-xs text-slate-400 text-center mb-6 font-mono tracking-widest uppercase">Security Clearance Required</p>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-2 font-bold">Passcode Key</label>
-              <input
-                type="password"
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                placeholder="Enter admin passcode (admin123)"
-                className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-3 text-sm font-semibold shadow-soft outline-none focus:ring-4 focus:ring-blue-100 transition-all text-center"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full py-3 bg-[#111111] hover:bg-slate-800 text-white font-syne font-bold text-xs uppercase tracking-widest rounded-xl transition-all shadow-md"
-            >
-              Unlock Terminal
-            </button>
-          </form>
-        </div>
+        <span className={`status-chip status-${lead.status || "pending"}`}>
+          {statusLabels[lead.status || "pending"]}
+        </span>
       </div>
+
+      <dl>
+        <div>
+          <dt>Email</dt>
+          <dd>{lead.contact_email}</dd>
+        </div>
+        {lead.phone && (
+          <div>
+            <dt>Phone</dt>
+            <dd>{lead.phone}</dd>
+          </div>
+        )}
+        <div>
+          <dt>Budget</dt>
+          <dd>{lead.ad_budget || "Not provided"}</dd>
+        </div>
+        <div>
+          <dt>Google profile</dt>
+          <dd>{lead.gmb_status || "Not provided"}</dd>
+        </div>
+        <div>
+          <dt>Received</dt>
+          <dd>{formatDate(lead.created_at)}</dd>
+        </div>
+      </dl>
+
+      <div className="lead-card-actions">
+        <select value={lead.status || "pending"} onChange={(event) => onStatusChange(lead.id, event.target.value)}>
+          {statusOptions.map((status) => (
+            <option key={status} value={status}>
+              {statusLabels[status]}
+            </option>
+          ))}
+        </select>
+        <button type="button" onClick={() => onDelete(lead.id)} aria-label={`Delete ${lead.business_name}`}>
+          <Trash2 size={17} />
+        </button>
+      </div>
+    </article>
+  );
+}
+
+export default function AdminDashboard() {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [mode, setMode] = useState("production");
+  const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const stats = useMemo(() => {
+    return submissions.reduce(
+      (current, lead) => {
+        const status = lead.status || "pending";
+        return {
+          total: current.total + 1,
+          pending: current.pending + (status === "pending" ? 1 : 0),
+          contacted: current.contacted + (status === "contacted" ? 1 : 0),
+          qualified: current.qualified + (status === "qualified" ? 1 : 0),
+        };
+      },
+      { total: 0, pending: 0, contacted: 0, qualified: 0 },
+    );
+  }, [submissions]);
+
+  const filteredSubmissions = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return submissions.filter((lead) => {
+      const matchesStatus = statusFilter === "all" || (lead.status || "pending") === statusFilter;
+      const searchable = [lead.business_name, lead.contact_name, lead.contact_email, lead.phone, lead.website_url]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return matchesStatus && (!normalizedQuery || searchable.includes(normalizedQuery));
+    });
+  }, [query, statusFilter, submissions]);
+
+  const loadSubmissions = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/submissions", { cache: "no-store" });
+      const result = await response.json();
+
+      if (response.status === 401) {
+        setAuthenticated(false);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to load submissions.");
+      }
+
+      setSubmissions(result.submissions || []);
+      setMode(result.mode || "production");
+      setAuthenticated(true);
+    } catch (loadError) {
+      setError(loadError.message);
+    } finally {
+      setLoading(false);
+      setAuthChecked(true);
+    }
+  };
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const response = await fetch("/api/admin/session", { cache: "no-store" });
+        const result = await response.json();
+        setMode(result.mode || "production");
+
+        if (result.authenticated) {
+          await loadSubmissions();
+        }
+      } finally {
+        setAuthChecked(true);
+      }
+    }
+
+    checkSession();
+  }, []);
+
+  const updateStatus = async (id, status) => {
+    const previous = submissions;
+    setSubmissions((current) => current.map((lead) => (lead.id === id ? { ...lead, status } : lead)));
+
+    try {
+      const response = await fetch(`/api/admin/submissions/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to update status.");
+      }
+    } catch (statusError) {
+      setSubmissions(previous);
+      setError(statusError.message);
+    }
+  };
+
+  const deleteLead = async (id) => {
+    const lead = submissions.find((submission) => submission.id === id);
+    if (!window.confirm(`Delete ${lead?.business_name || "this submission"}?`)) return;
+
+    const previous = submissions;
+    setSubmissions((current) => current.filter((submission) => submission.id !== id));
+
+    try {
+      const response = await fetch(`/api/admin/submissions/${id}`, { method: "DELETE" });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to delete submission.");
+      }
+    } catch (deleteError) {
+      setSubmissions(previous);
+      setError(deleteError.message);
+    }
+  };
+
+  const logout = async () => {
+    await fetch("/api/admin/logout", { method: "POST" });
+    setAuthenticated(false);
+    setSubmissions([]);
+  };
+
+  if (!authChecked) {
+    return (
+      <main className="admin-loading">
+        <RefreshCw size={28} className="spin" />
+        <span>Loading admin panel...</span>
+      </main>
     );
   }
 
+  if (!authenticated) {
+    return <LoginPanel mode={mode} onLogin={loadSubmissions} />;
+  }
+
   return (
-    <div className="min-h-screen bg-[#F4F7F6] text-[#111111] font-sans pb-16">
-      <nav className="w-full z-50 px-6 md:px-10 py-6 flex justify-between items-center bg-white/30 backdrop-blur-md border-b border-slate-200/50">
-        <div className="flex items-center gap-3">
-          <Logo size={36} />
-          <span className="font-syne text-xl font-bold tracking-tight">AdsGrowly <span className="text-xs font-mono text-[#E53935] uppercase font-bold tracking-widest ml-1">Admin Panel</span></span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-xs font-bold text-slate-500 hover:text-slate-900 border border-slate-200 bg-white/60 px-4 py-2 rounded-xl transition-all">
-            Back to Site
+    <main className="admin-shell">
+      <header className="admin-header">
+        <Link href="/" className="brand-link">
+          <Logo size={38} />
+          <span>Ads Growly</span>
+        </Link>
+        <div className="admin-header-actions">
+          <button type="button" className="button button-secondary" onClick={loadSubmissions} disabled={loading}>
+            <RefreshCw size={17} className={loading ? "spin" : ""} />
+            Refresh
+          </button>
+          <Link href="/" className="button button-secondary">
+            <ArrowLeft size={17} />
+            Back to site
           </Link>
-          <button
-            onClick={() => setIsAuthenticated(false)}
-            className="text-xs font-bold text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl transition-all"
-          >
+          <button type="button" className="button button-danger" onClick={logout}>
+            <LogOut size={17} />
             Lock
           </button>
         </div>
-      </nav>
+      </header>
 
-      <main className="max-w-7xl mx-auto px-6 mt-10">
-        {/* Statistics Panels */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-          <div className="glass p-6 rounded-2xl border-white/60 shadow-soft bg-white/40">
-            <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block mb-1">Total Submissions</span>
-            <div className="text-3xl font-syne font-black text-slate-800">{stats.total}</div>
+      <section className="admin-main">
+        <div className="admin-title-row">
+          <div>
+            <h1>Admin panel</h1>
+            <p>{mode === "local-preview" ? "Local preview storage is active until Supabase is connected." : "Supabase-backed submissions are ready."}</p>
           </div>
-          <div className="glass p-6 rounded-2xl border-white/60 shadow-soft bg-white/40">
-            <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block mb-1">Pending Review</span>
-            <div className="text-3xl font-syne font-black text-[#1E88E5]">{stats.pending}</div>
-          </div>
-          <div className="glass p-6 rounded-2xl border-white/60 shadow-soft bg-white/40">
-            <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block mb-1">Contacted</span>
-            <div className="text-3xl font-syne font-black text-amber-500">{stats.contacted}</div>
-          </div>
-          <div className="glass p-6 rounded-2xl border-white/60 shadow-soft bg-white/40">
-            <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest block mb-1">Qualified Leaders</span>
-            <div className="text-3xl font-syne font-black text-green-500">{stats.qualified}</div>
-          </div>
+          <ShieldCheck size={30} />
         </div>
 
-        {/* Submissions List */}
-        <div className="glass rounded-[2rem] border-white/60 shadow-glass overflow-hidden bg-white/30 backdrop-blur-md">
-          <div className="px-8 py-5 bg-white/40 border-b border-slate-200/50 flex justify-between items-center">
-            <h3 className="font-syne text-lg font-bold">Leads Registry</h3>
-            <button
-              onClick={fetchSubmissions}
-              className="text-xs font-mono font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5"
-            >
-              <i className="ti ti-rotate text-sm" /> Refresh Node
-            </button>
-          </div>
+        <div className="admin-stats-grid">
+          <StatCard label="Total" value={stats.total} icon={Users} />
+          <StatCard label="Pending" value={stats.pending} icon={Clock3} />
+          <StatCard label="Contacted" value={stats.contacted} icon={Phone} />
+          <StatCard label="Qualified" value={stats.qualified} icon={CheckCircle2} />
+        </div>
 
-          <div className="overflow-x-auto">
-            {loading ? (
-              <div className="text-center py-20">
-                <i className="ti ti-loader text-3xl text-[#E53935] animate-spin mb-4 block" />
-                <span className="text-xs font-mono text-slate-400 uppercase tracking-widest">Querying database rows...</span>
-              </div>
-            ) : submissions.length === 0 ? (
-              <div className="text-center py-20">
-                <span className="text-xs font-mono text-slate-400 uppercase tracking-widest">No lead records found.</span>
-              </div>
-            ) : (
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-slate-100/50 text-slate-400 font-mono uppercase tracking-wider border-b border-slate-200/50">
-                    <th className="px-6 py-4 font-bold">Business Name</th>
-                    <th className="px-6 py-4 font-bold">Commander Info</th>
-                    <th className="px-6 py-4 font-bold">Ad Budget</th>
-                    <th className="px-6 py-4 font-bold">GMB Status</th>
-                    <th className="px-6 py-4 font-bold">Date Received</th>
-                    <th className="px-6 py-4 font-bold">Status Action</th>
-                    <th className="px-6 py-4 font-bold text-right">Operation</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200/40">
-                  {submissions.map((lead) => (
-                    <tr key={lead.id} className="hover:bg-white/40 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-slate-800 text-sm">{lead.business_name}</div>
+        <div className="admin-toolbar">
+          <label className="admin-search">
+            <Search size={18} />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search business or contact..."
+            />
+          </label>
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+            <option value="all">All status</option>
+            {statusOptions.map((status) => (
+              <option key={status} value={status}>
+                {statusLabels[status]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {error && <p className="admin-error">{error}</p>}
+
+        <section className="admin-table-shell">
+          <div className="admin-table-scroll">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Business</th>
+                  <th>Contact</th>
+                  <th>Budget</th>
+                  <th>Google profile</th>
+                  <th>Received</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSubmissions.map((lead) => (
+                  <tr key={lead.id}>
+                    <td>
+                      <strong>{lead.business_name}</strong>
+                      {lead.website_url && (
+                        <a href={lead.website_url} target="_blank" rel="noreferrer">
+                          {lead.website_url}
+                        </a>
+                      )}
+                    </td>
+                    <td>
+                      <strong>{lead.contact_name}</strong>
+                      <span>{lead.contact_email}</span>
+                      {lead.phone && <span>{lead.phone}</span>}
+                    </td>
+                    <td>{lead.ad_budget || "Not provided"}</td>
+                    <td>{lead.gmb_status || "Not provided"}</td>
+                    <td>{formatDate(lead.created_at)}</td>
+                    <td>
+                      <select
+                        value={lead.status || "pending"}
+                        onChange={(event) => updateStatus(lead.id, event.target.value)}
+                      >
+                        {statusOptions.map((status) => (
+                          <option key={status} value={status}>
+                            {statusLabels[status]}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <div className="table-actions">
                         {lead.website_url && (
-                          <a href={lead.website_url} target="_blank" rel="noopener noreferrer" className="text-[10px] text-blue-500 hover:underline">
-                            {lead.website_url}
+                          <a href={lead.website_url} target="_blank" rel="noreferrer" aria-label="Open website">
+                            <Eye size={17} />
                           </a>
                         )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-700">{lead.contact_name}</div>
-                        <div className="text-slate-400">{lead.contact_email}</div>
-                        {lead.phone && <div className="text-slate-400 font-mono">{lead.phone}</div>}
-                      </td>
-                      <td className="px-6 py-4 font-semibold text-slate-600 font-mono capitalize">
-                        {lead.ad_budget || "N/A"}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${lead.gmb_status === "yes" ? "bg-green-100 text-green-700" : "bg-zinc-100 text-zinc-600"}`}>
-                          GMB: {lead.gmb_status || "N/A"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-slate-400 font-mono">
-                        {new Date(lead.created_at).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <select
-                          value={lead.status || "pending"}
-                          onChange={(e) => handleStatusChange(lead.id, e.target.value)}
-                          className="bg-white border border-slate-200 rounded px-3 py-1 font-bold text-slate-700 outline-none focus:border-blue-500 shadow-sm cursor-pointer"
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="contacted">Contacted</option>
-                          <option value="qualified">Qualified</option>
-                          <option value="closed">Closed / Deal</option>
-                        </select>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleDelete(lead.id)}
-                          className="text-red-500 hover:text-red-700 font-bold px-2 py-1"
-                          title="Delete Lead"
-                        >
-                          <i className="ti ti-trash text-base" />
+                        <button type="button" onClick={() => deleteLead(lead.id)} aria-label={`Delete ${lead.business_name}`}>
+                          <Trash2 size={17} />
                         </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
-      </main>
-    </div>
+
+          {!loading && filteredSubmissions.length === 0 && <EmptyState />}
+          {loading && (
+            <div className="admin-empty-state">
+              <RefreshCw size={34} className="spin" />
+              <h2>Loading submissions</h2>
+            </div>
+          )}
+        </section>
+
+        <section className="lead-mobile-list">
+          {!loading &&
+            filteredSubmissions.map((lead) => (
+              <LeadMobileCard key={lead.id} lead={lead} onStatusChange={updateStatus} onDelete={deleteLead} />
+            ))}
+          {!loading && filteredSubmissions.length === 0 && <EmptyState />}
+        </section>
+      </section>
+    </main>
   );
 }

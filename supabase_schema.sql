@@ -1,43 +1,44 @@
--- Run this SQL script in your Supabase SQL Editor to create the leads database table:
+-- Ads Growly Supabase schema.
+-- Run this in the Supabase SQL Editor after creating the project.
 
-CREATE TABLE IF NOT EXISTS submissions (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    business_name TEXT NOT NULL,
-    website_url TEXT,
-    ad_budget TEXT,
-    contact_name TEXT NOT NULL,
-    contact_email TEXT NOT NULL,
-    phone TEXT,
-    gmb_status TEXT,
-    status TEXT DEFAULT 'pending'
+create extension if not exists pgcrypto;
+
+create table if not exists public.submissions (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  business_name text not null,
+  business_vertical text,
+  website_url text,
+  ad_budget text not null,
+  contact_name text not null,
+  contact_email text not null,
+  phone text,
+  gmb_status text not null,
+  status text not null default 'pending',
+  constraint submissions_status_check check (status in ('pending', 'contacted', 'qualified', 'closed')),
+  constraint submissions_contact_email_check check (position('@' in contact_email) > 1)
 );
 
--- Enable Row Level Security (RLS) if you want to restrict public access
-ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
+alter table public.submissions enable row level security;
 
--- Allow anonymous inserts (so form submissions from the web work)
-CREATE POLICY "Allow anonymous inserts" 
-ON submissions 
-FOR INSERT 
-TO anon 
-WITH CHECK (true);
+revoke all on table public.submissions from anon, authenticated;
+grant insert on table public.submissions to anon, authenticated;
+grant select, insert, update, delete on table public.submissions to service_role;
 
--- Allow authenticated users or select roles to view/update listings (for the admin panel)
-CREATE POLICY "Allow anon select for demo" 
-ON submissions 
-FOR SELECT 
-TO anon 
-USING (true);
+drop policy if exists "public can create submissions" on public.submissions;
+create policy "public can create submissions"
+on public.submissions
+for insert
+to anon, authenticated
+with check (
+  business_name <> ''
+  and contact_name <> ''
+  and contact_email <> ''
+  and ad_budget <> ''
+  and gmb_status <> ''
+  and status = 'pending'
+);
 
-CREATE POLICY "Allow anon update for demo" 
-ON submissions 
-FOR UPDATE 
-TO anon 
-USING (true);
-
-CREATE POLICY "Allow anon delete for demo" 
-ON submissions 
-FOR DELETE 
-TO anon 
-USING (true);
+create index if not exists submissions_created_at_idx on public.submissions (created_at desc);
+create index if not exists submissions_status_idx on public.submissions (status);
