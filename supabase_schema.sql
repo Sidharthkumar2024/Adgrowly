@@ -1,4 +1,4 @@
--- Ads Growly Supabase schema.
+-- Ad Growly Supabase schema.
 -- Run this in the Supabase SQL Editor after creating the project.
 
 create extension if not exists pgcrypto;

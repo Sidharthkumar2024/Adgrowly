@@ -86,7 +86,7 @@ function LoginPanel({ mode, onLogin }) {
     <main className="admin-login-shell">
       <Link href="/" className="brand-link admin-login-brand">
         <Logo size={40} />
-        <span>Ads Growly</span>
+        <span>Ad Growly</span>
       </Link>
 
       <section className="admin-login-panel">
@@ -338,7 +338,7 @@ export default function AdminDashboard() {
       <header className="admin-header">
         <Link href="/" className="brand-link">
           <Logo size={38} />
-          <span>Ads Growly</span>
+          <span>Ad Growly</span>
         </Link>
         <div className="admin-header-actions">
           <button type="button" className="button button-secondary" onClick={loadSubmissions} disabled={loading}>

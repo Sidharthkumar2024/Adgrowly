@@ -20,9 +20,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "Ads Growly - Local Growth Systems",
+  title: "Ad Growly - Local Growth Systems",
   description:
-    "Google Business Profile, Google Ads, Meta campaigns, and conversion pages for service businesses.",
+    "Websites, local SEO, paid ads, automations, and conversion tracking for local service businesses.",
 };
 
 export default function RootLayout({ children }) {

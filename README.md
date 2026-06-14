@@ -1,6 +1,6 @@
-# Ads Growly
+# Ad Growly
 
-A focused Next.js App Router site for Ads Growly with a public intake form, admin panel, and Supabase-ready submissions storage.
+A focused Next.js App Router site for Ad Growly with a public intake form, admin panel, and Supabase-ready submissions storage.
 
 ## Local Development
 
